@@ -140,79 +140,86 @@ exports.closest = (req, res, next) => {
                     });
             });
     }
-
-    //validate zip code using regex
-    function validateZipCode(zipCode) {
-        const re = /^[0-9]{5}(-[0-9]{4})?$/;
-
-        return re.test(zipCode);
+    else {
+        res.status(404).json({
+            status: 404,
+            message: 'Route not found!',
+        });
     }
-    
-    //calculate the distance between two points using Haversine formula
-    function calculateDistance(lat1, long1, lat2, long2) {
-        let dLat = (lat2 - lat1) * Math.PI / 180.0;
-        let dLon = (long2 - long1) * Math.PI / 180.0;
-    
-        // convert to radians 
-        lat1 = (lat1) * Math.PI / 180.0;
-        lat2 = (lat2) * Math.PI / 180.0;
-    
-        // apply formulae 
-        let a = Math.pow(Math.sin(dLat / 2), 2) + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
-        let rad = 6371;
-        let c = 2 * Math.asin(Math.sqrt(a));
 
-        return rad * c; 
-    }
-    
-    //convert from km to mi
-    function unitConversion(value) {
-        return value / 1.60934;
-        //return value * 0.621371;
-    }
-    
-    //convert to two decimal places
-    function convertToTwoDecimal(num) {
-        return num.toFixed(2);
-    }
-    
-    //get the closest store to a location
-    function fileDatabaseSearch(latitude, longitude) {
-        let distanceDifference = null;
-        let response = {};
-        let closest = {};
+}
 
-        //return the distance and address of the closest store
-        return new Promise((resolve, reject) => {
-            fs
-                .createReadStream(fileLocation)
-                .pipe(csvHandle.parse({ headers: true }))
-                .on('data', row => {
-                    let latitudeFromFile = row.Latitude;
-                    let longitudeFromFile = row.Longitude;
-    
-                    let difference = calculateDistance(latitude, longitude, latitudeFromFile, longitudeFromFile);
+//validate zip code using regex
+function validateZipCode(zipCode) {
+    const re = /^[0-9]{5}(-[0-9]{4})?$/;
 
-                    //check for shortest distance. always keep the initial shortest distance
-                    if (distanceDifference === null) {
+    return re.test(zipCode);
+}
+
+//calculate the distance between two points using Haversine formula
+function calculateDistance(lat1, long1, lat2, long2) {
+    let dLat = (lat2 - lat1) * Math.PI / 180.0;
+    let dLon = (long2 - long1) * Math.PI / 180.0;
+
+    // convert to radians 
+    lat1 = (lat1) * Math.PI / 180.0;
+    lat2 = (lat2) * Math.PI / 180.0;
+
+    // apply formulae 
+    let a = Math.pow(Math.sin(dLat / 2), 2) + Math.pow(Math.sin(dLon / 2), 2) * Math.cos(lat1) * Math.cos(lat2);
+    let rad = 6371;
+    let c = 2 * Math.asin(Math.sqrt(a));
+
+    return rad * c; 
+}
+
+//convert from km to mi
+function unitConversion(value) {
+    return value / 1.60934;
+    //return value * 0.621371;
+}
+
+//convert to two decimal places
+function convertToTwoDecimal(num) {
+    return num.toFixed(2);
+}
+
+//get the closest store to a location
+function fileDatabaseSearch(latitude, longitude) {
+    let distanceDifference = null;
+    let response = {};
+    let closest = {};
+
+    //return the distance and address of the closest store
+    return new Promise((resolve, reject) => {
+        fs
+            .createReadStream(fileLocation)
+            .pipe(csvHandle.parse({ headers: true }))
+            .on('data', row => {
+                let latitudeFromFile = row.Latitude;
+                let longitudeFromFile = row.Longitude;
+
+                let difference = calculateDistance(latitude, longitude, latitudeFromFile, longitudeFromFile);
+
+                //check for shortest distance. always keep the initial shortest distance
+                if (distanceDifference === null) {
+                    distanceDifference = difference;
+                    closest = row;
+                } else {
+                    if (difference < distanceDifference) {
                         distanceDifference = difference;
                         closest = row;
-                    } else {
-                        if (difference < distanceDifference) {
-                            distanceDifference = difference;
-                            closest = row;
-                        }
                     }
-                })
-                .on('end', () => {
-                    //return the required data - distance and address
-                    response = { distance: distanceDifference, address: closest.Address };
-                    resolve(response);
-                })
-                .on('error', err => {
-                    reject(err);
-                });
-    
-        })
-    }
+                }
+            })
+            .on('end', () => {
+                //return the required data - distance and address
+                response = { distance: distanceDifference, address: closest.Address };
+                resolve(response);
+            })
+            .on('error', err => {
+                reject(err);
+            });
+
+    })
 }

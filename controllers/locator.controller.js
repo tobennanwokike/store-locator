@@ -79,6 +79,67 @@ exports.closest = (req, res, next) => {
             });
 
     }
+    else if (req.query.address) {
+        
+        //only accept address parameter
+        if (Object.keys(req.query).length > 1) {
+            res.status(404).json({
+                status: 404,
+                message: 'Route not found!'
+            });
+            return;
+        }
+
+        //encode URI and decode for Google Geolocation API
+        let address = encodeURI(req.query.address);
+        address = decodeURI(address);
+        //replace all spaces with a +
+        address = address.replace(/\s/g, "+");
+
+        //make call to Google Geolocation API
+        const apiURL = `${appConfig.googleMapURL}/${appConfig.googleMapRespType}?address=${address}&key=${appConfig.googleMapApiKey}`;
+        let googleResponse = '';
+        let distanceDifference = null;
+
+        httpsHandle
+            .get(apiURL, resp => {
+                resp
+                    .on('data', (data) => {
+                        googleResponse += data;
+                    })
+                    .on('end', () => {
+                        googleResponse = JSON.parse(googleResponse);
+
+                        //check for errors with API call
+                        if (googleResponse.status !== 'OK') {
+                            res.status(400).json({
+                                status: 400,
+                                message: 'Error validating address!',
+                                data: {}
+                            });
+                            return;
+                        }
+
+                        const latitudeFromAddress = googleResponse.results[0].geometry.location.lat;
+                        const longitudeFromAddress = googleResponse.results[0].geometry.location.lng;
+
+                        //get the distance and address of the nearest store to the zip code
+                        fileDatabaseSearch(latitudeFromAddress, longitudeFromAddress)
+                            .then(data => {
+                                //send response to client
+                                distanceDifference = convertToTwoDecimal(unitConversion(data.distance)) + ' mi';
+                                res.json({
+                                    status: 200,
+                                    message: 'Successful',
+                                    data: { distance: distanceDifference, address: data.address }
+                                });
+                            })
+                            .catch(err => {
+                                console.log('error occured!', err);
+                            });
+                    });
+            });
+    }
 
     //validate zip code using regex
     function validateZipCode(zipCode) {

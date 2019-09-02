@@ -11,7 +11,7 @@ exports.closest = (req, res, next) => {
         let zipCodeData = '';
         
         //check if units paramater exists and assign to miles unless km specified
-        let unit = req.query.units && (req.query.units === 'mi' || req.query.units == 'km') ? req.query.units : 'mi';
+        let unit = req.query.units && (req.query.units === 'mi' || req.query.units === 'km') ? req.query.units : 'mi';
 
         const zipCode = req.query.zip;
 

@@ -202,15 +202,10 @@ function fileDatabaseSearch(latitude, longitude) {
                 let difference = calculateDistance(latitude, longitude, latitudeFromFile, longitudeFromFile);
 
                 //check for shortest distance. always keep the initial shortest distance
-                if (distanceDifference === null) {
+                if (distanceDifference === null || difference < distanceDifference) {
                     distanceDifference = difference;
                     closest = row;
-                } else {
-                    if (difference < distanceDifference) {
-                        distanceDifference = difference;
-                        closest = row;
-                    }
-                }
+                } 
             })
             .on('end', () => {
                 //return the required data - distance and address

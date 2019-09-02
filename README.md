@@ -70,7 +70,7 @@ See sample requests below:
 
 `GET /closest?zip=55428`
 
-    curl -i -H 'Accept: application/json' http://localhost:3000/closest?zip=55428
+    curl -i -H 'Accept: application/json' -d 'zip=55428' http://localhost:3000?zip=55428
 
 #### Response
 
@@ -90,7 +90,7 @@ See sample requests below:
 
 `GET /closest?address=1600%20Amphitheatre%20Parkway%20Mountain%20View,%20CA`
 
-    curl -i -H 'Accept: application/json' http://localhost:3000/closest?address=1600%20Amphitheatre%20Parkway%20Mountain%20View,%20CA
+    curl -i -H 'Accept: application/json' -d 'address=1600%20Amphitheatre%20Parkway%20Mountain%20View,%20CA' http://localhost:3000?address=1600%20Amphitheatre%20Parkway%20Mountain%20View,%20CA
 
 #### Response
 
@@ -110,7 +110,7 @@ See sample requests below:
 
 `GET /closest?zip=55428&units=km`
 
-    curl -i -H 'Accept: application/json' http://localhost:3000/closest?zip=55428&units=km
+    curl -i -H 'Accept: application/json' -d 'zip=554288&units=km' http://localhost:3000?zip=55428&units=km
 
 #### Response
 
@@ -130,7 +130,7 @@ See sample requests below:
 
 `GET /closest?zip=000`
 
-    curl -i -H 'Accept: application/json' http://localhost:3000/closest?zip=000
+    curl -i -H 'Accept: application/json' -d 'zip=55428' http://localhost:3000?zip=000
 
 #### Response
 

@@ -11,7 +11,7 @@ exports.closest = (req, res, next) => {
         let zipCodeData = '';
         
         //check if units paramater exists and assign to miles unless km specified
-        let unit = req.query.units && (req.query.units === 'mi' || req.query.units == 'km') ? req.query.units : 'mi';
+        let unit = req.query.units && (req.query.units === 'mi' || req.query.units === 'km') ? req.query.units : 'mi';
 
         const zipCode = req.query.zip;
 
@@ -202,15 +202,10 @@ function fileDatabaseSearch(latitude, longitude) {
                 let difference = calculateDistance(latitude, longitude, latitudeFromFile, longitudeFromFile);
 
                 //check for shortest distance. always keep the initial shortest distance
-                if (distanceDifference === null) {
+                if (distanceDifference === null || difference < distanceDifference) {
                     distanceDifference = difference;
                     closest = row;
-                } else {
-                    if (difference < distanceDifference) {
-                        distanceDifference = difference;
-                        closest = row;
-                    }
-                }
+                } 
             })
             .on('end', () => {
                 //return the required data - distance and address
